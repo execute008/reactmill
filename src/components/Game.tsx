@@ -170,21 +170,38 @@ const Game: React.FC = () => {
     }
   };
 
+  // Define your desired game world size:
+  const worldWidth = 10;
+  const worldHeight = 20;
+  const thumbOffset = 1;
+
+  const clamp = (value: number, min: number, max: number) =>
+    Math.max(min, Math.min(max, value));
+
   const handlePointerDown = (e: React.PointerEvent) => {
-    const x = (e.clientX / window.innerWidth) * 10 - 5;
-    const z = (e.clientY / window.innerHeight) * 10 - 5;
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    // Compute the world coordinate based on canvas relative pointer position
+    const rawX = ((e.clientX - rect.left) / rect.width) * worldWidth - worldWidth / 2;
+    const rawZ = ((e.clientY - rect.top) / rect.height) * worldHeight - worldHeight / 2;
+    const x = clamp(rawX, -worldWidth / 2, worldWidth / 2);
+    const z = clamp(rawZ, -worldHeight / 2, worldHeight / 2);
     playerRef.current.x = x;
     playerRef.current.z = -z;
+    playerRef.current.z = playerRef.current.z + thumbOffset;
     startShooting();
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (shootIntervalRef.current) {
-      const x = (e.clientX / window.innerWidth) * 10 - 5;
-      const z = (e.clientY / window.innerHeight) * 10 - 5;
-      playerRef.current.x = x;
-      playerRef.current.z = -z;
-    }
+    if (!shootIntervalRef.current || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const rawX = ((e.clientX - rect.left) / rect.width) * worldWidth - worldWidth / 2;
+    const rawZ = ((e.clientY - rect.top) / rect.height) * worldHeight - worldHeight / 2;
+    const x = clamp(rawX, -worldWidth / 2, worldWidth / 2);
+    const z = clamp(rawZ, -worldHeight / 2, worldHeight / 2);
+    playerRef.current.x = x;
+    playerRef.current.z = -z;
+    playerRef.current.z = playerRef.current.z + thumbOffset;
   };
 
   const handlePointerUp = () => {
@@ -199,7 +216,7 @@ const Game: React.FC = () => {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        camera={{ fov: 105, position: [0, -10, 0] }}
+        camera={{ fov: 105, position: [0, -10, 2] }}
       >
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
