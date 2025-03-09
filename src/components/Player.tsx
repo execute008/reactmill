@@ -15,7 +15,7 @@ const Player: React.FC<PlayerProps> = ({ position }) => {
 
   return (
     <mesh ref={ref} position={position}>
-      <boxGeometry args={[1, 1, 1]} />
+      <coneGeometry args={[0.5, 1, 4]} />
       <meshStandardMaterial color="blue" />
     </mesh>
   );
